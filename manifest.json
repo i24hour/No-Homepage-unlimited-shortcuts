@@ -1,0 +1,29 @@
+{
+    "manifest_version": 3,
+    "name": "Quick Link Shortcuts",
+    "version": "1.0",
+    "description": "Add and manage quick shortcut links on your new tab page",
+    "permissions": [
+        "storage",
+        "tabs"
+    ],
+    "action": {
+        "default_popup": "popup.html",
+        "default_title": "Quick Link Shortcuts"
+    },
+    "commands": {
+        "open-full-page": {
+            "suggested_key": {
+                "default": "Ctrl+Shift+L",
+                "mac": "Command+Shift+L"
+            },
+            "description": "Open Quick Links full page"
+        }
+    },
+    "background": {
+        "service_worker": "background.js"
+    },
+    "chrome_url_overrides": {
+        "newtab": "newtab.html"
+    }
+}
