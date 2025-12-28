@@ -1,15 +1,16 @@
 {
     "manifest_version": 3,
-    "name": "Quick Link Shortcuts",
+    "name": "iCTrL - Tab Control & Quick Links",
     "version": "1.0",
-    "description": "Add and manage quick shortcut links on your new tab page",
+    "description": "Take control of your browser! Quick link shortcuts on new tab + RAM Saver that auto-closes inactive tabs. Customize your browsing experience.",
     "permissions": [
         "storage",
-        "tabs"
+        "tabs",
+        "alarms"
     ],
     "action": {
         "default_popup": "popup.html",
-        "default_title": "Quick Link Shortcuts"
+        "default_title": "iCTrL - Control Your Browser"
     },
     "commands": {
         "open-full-page": {

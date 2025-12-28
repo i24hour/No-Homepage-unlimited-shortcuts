@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quick Links</title>
+    <title>iCTrL</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         * {
@@ -322,12 +322,281 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #484f58;
         }
+
+        /* RAM Saver Settings */
+        .settings-divider {
+            height: 1px;
+            background: #30363d;
+            margin: 16px 0;
+        }
+
+        .settings-section {
+            padding: 0 12px 12px;
+        }
+
+        .settings-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .settings-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #8b949e;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .settings-title svg {
+            color: #f0883e;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            width: 40px;
+            height: 22px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #30363d;
+            transition: 0.3s;
+            border-radius: 22px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: #8b949e;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        .toggle-switch input:checked+.toggle-slider {
+            background-color: #238636;
+        }
+
+        .toggle-switch input:checked+.toggle-slider:before {
+            transform: translateX(18px);
+            background-color: white;
+        }
+
+        .setting-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+
+        .setting-label {
+            font-size: 13px;
+            color: #c9d1d9;
+        }
+
+        .setting-sublabel {
+            font-size: 11px;
+            color: #8b949e;
+            margin-top: 2px;
+        }
+
+        /* Timeout Slider */
+        .timeout-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .timeout-slider {
+            width: 80px;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #30363d;
+            border-radius: 2px;
+            outline: none;
+        }
+
+        .timeout-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            background: #58a6ff;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .timeout-value {
+            font-size: 12px;
+            color: #58a6ff;
+            min-width: 45px;
+            text-align: right;
+            font-weight: 500;
+        }
+
+        /* Whitelist */
+        .whitelist-container {
+            margin-top: 8px;
+        }
+
+        .whitelist-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .whitelist-title {
+            font-size: 12px;
+            color: #8b949e;
+        }
+
+        .whitelist-add-btn {
+            padding: 4px 8px;
+            background: transparent;
+            border: 1px solid #30363d;
+            border-radius: 4px;
+            color: #8b949e;
+            font-size: 11px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .whitelist-add-btn:hover {
+            border-color: #58a6ff;
+            color: #58a6ff;
+        }
+
+        .whitelist-input-row {
+            display: none;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .whitelist-input-row.active {
+            display: flex;
+        }
+
+        .whitelist-input {
+            flex: 1;
+            padding: 6px 8px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 4px;
+            color: #e6edf3;
+            font-size: 12px;
+        }
+
+        .whitelist-input:focus {
+            outline: none;
+            border-color: #58a6ff;
+        }
+
+        .whitelist-save-btn {
+            padding: 6px 10px;
+            background: #238636;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .whitelist-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .whitelist-tag {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            background: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 4px;
+            font-size: 11px;
+            color: #c9d1d9;
+        }
+
+        .whitelist-tag-remove {
+            background: none;
+            border: none;
+            color: #8b949e;
+            cursor: pointer;
+            font-size: 14px;
+            line-height: 1;
+            padding: 0;
+        }
+
+        .whitelist-tag-remove:hover {
+            color: #f85149;
+        }
+
+        .whitelist-empty {
+            font-size: 11px;
+            color: #6e7681;
+            font-style: italic;
+        }
+
+        .stats-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 12px;
+            background: rgba(56, 139, 253, 0.1);
+            border: 1px solid rgba(56, 139, 253, 0.3);
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+
+        .stats-icon {
+            color: #58a6ff;
+        }
+
+        .stats-text {
+            font-size: 11px;
+            color: #8b949e;
+        }
+
+        .stats-value {
+            color: #58a6ff;
+            font-weight: 600;
+        }
     </style>
 </head>
 
 <body>
     <div class="header">
-        <h1>Quick Links</h1>
+        <h1>iCTrL</h1>
         <button class="open-full" id="openFull">Open Full Page</button>
     </div>
 
@@ -340,6 +609,68 @@
             </svg>
             Add Shortcut
         </button>
+
+        <!-- RAM Saver Settings -->
+        <div class="settings-divider"></div>
+        <div class="settings-section">
+            <div class="settings-header">
+                <span class="settings-title">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path
+                            d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83">
+                        </path>
+                    </svg>
+                    RAM Saver
+                </span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="ramSaverToggle">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+
+            <div id="ramSaverSettings">
+                <div class="stats-row" id="statsRow">
+                    <svg class="stats-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <rect x="2" y="6" width="20" height="12" rx="2"></rect>
+                        <path d="M6 12h.01M10 12h.01M14 12h.01M18 12h.01"></path>
+                    </svg>
+                    <span class="stats-text">Tracking <span class="stats-value" id="tabCount">0</span> tabs</span>
+                </div>
+
+                <div class="setting-row">
+                    <div>
+                        <div class="setting-label">Auto-close after</div>
+                        <div class="setting-sublabel">Inactive tab timeout</div>
+                    </div>
+                    <div class="timeout-control">
+                        <input type="range" class="timeout-slider" id="timeoutSlider" min="5" max="120" value="30">
+                        <span class="timeout-value" id="timeoutValue">30 min</span>
+                    </div>
+                </div>
+
+                <div class="whitelist-container">
+                    <div class="whitelist-header">
+                        <span class="whitelist-title">Protected domains</span>
+                        <button class="whitelist-add-btn" id="addWhitelistBtn">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            Add
+                        </button>
+                    </div>
+                    <div class="whitelist-input-row" id="whitelistInputRow">
+                        <input type="text" class="whitelist-input" id="whitelistInput" placeholder="e.g. youtube.com">
+                        <button class="whitelist-save-btn" id="saveWhitelistBtn">Add</button>
+                    </div>
+                    <div class="whitelist-list" id="whitelistList">
+                        <span class="whitelist-empty">No protected domains</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Modal -->
