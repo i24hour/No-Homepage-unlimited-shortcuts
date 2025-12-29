@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "iCTrL - Tab Control & Quick Links",
     "version": "1.0",
-    "description": "Take control of your browser! Quick link shortcuts on new tab + RAM Saver that auto-closes inactive tabs. Customize your browsing experience.",
+    "description": "Control your browser! Quick link shortcuts on new tab + RAM Saver that auto-closes inactive tabs.",
     "permissions": [
         "storage",
         "tabs",
