@@ -40,10 +40,26 @@
 
 ### Manual Installation (Developer Mode)
 1. Download or clone this repository
-2. Open Chrome and go to `chrome://extensions`
-3. Enable **Developer mode** (toggle in top right)
-4. Click **Load unpacked**
-5. Select the extension folder
+2. Copy `firebase-config.example.js` to `firebase-config.js`
+3. Add your Firebase credentials to `firebase-config.js`
+4. Update `manifest.json` with your OAuth Client ID
+5. Open Chrome and go to `chrome://extensions`
+6. Enable **Developer mode** (toggle in top right)
+7. Click **Load unpacked**
+8. Select the extension folder
+
+---
+
+## 🔧 Firebase Setup (For Cloud Sync)
+
+To enable Google Sign-In and Cloud Sync:
+
+1. Create a Firebase project at [console.firebase.google.com](https://console.firebase.google.com)
+2. Enable Google Authentication
+3. Create a Firestore Database
+4. Get your Firebase config and add to `firebase-config.js`
+5. Create OAuth Client ID in Google Cloud Console for Chrome Extension
+6. Add your Client ID to `manifest.json`
 
 ---
 
@@ -54,8 +70,9 @@
 | `storage` | Save your shortcuts and settings locally |
 | `tabs` | Track tab activity for RAM Saver & open shortcuts |
 | `alarms` | Run periodic checks for inactive tabs |
+| `identity` | Google Sign-In for Cloud Sync |
 
-**Privacy First:** All data stays on your device. No external servers, no tracking, no analytics.
+**Privacy First:** Your data is stored locally or in your own Firebase project. No external servers, no tracking, no analytics.
 
 ---
 
@@ -74,6 +91,11 @@
 4. Adjust timeout with slider (5-120 min)
 5. Add protected domains to whitelist
 
+### Cloud Sync
+1. Click "Sign in with Google" in the popup
+2. Your shortcuts and settings will sync across devices
+3. Sign in on any device to access your data
+
 ### Editing/Deleting Shortcuts
 Right-click any shortcut to edit or delete it.
 
@@ -82,8 +104,8 @@ Right-click any shortcut to edit or delete it.
 ## 🔐 Privacy
 
 iCTrL respects your privacy:
-- ✅ All data stored locally on your device
-- ✅ No data collection or transmission
+- ✅ All data stored locally or in your own Firebase
+- ✅ No data collection or transmission to third parties
 - ✅ No analytics or tracking
 - ✅ Open source and transparent
 
@@ -92,6 +114,11 @@ Read our full [Privacy Policy](privacy-policy.html)
 ---
 
 ## 📝 Changelog
+
+### v1.1.0 (January 2026)
+- ✨ **NEW:** Cloud Sync - Sign in with Google to sync shortcuts across devices
+- ✨ **NEW:** Firebase Authentication integration
+- 🔧 Improved error handling
 
 ### v1.0.0 (December 2025)
 - Initial release

@@ -10,12 +10,12 @@
         "identity"
     ],
     "oauth2": {
-        "client_id": "158430504218-6kjkorj1aej4m3khkkj8j0tcofto8r6p.apps.googleusercontent.com",
+        "client_id": "YOUR_OAUTH_CLIENT_ID.apps.googleusercontent.com",
         "scopes": [
             "openid",
             "email",
             "profile",
-            "https://www.googleapis.com/auth/datastore"
+            "https://www.googleapis.com/auth/cloud-platform"
         ]
     },
     "action": {
@@ -36,6 +36,5 @@
     },
     "chrome_url_overrides": {
         "newtab": "newtab.html"
-    },
-    "key": "YOUR_EXTENSION_KEY"
+    }
 }

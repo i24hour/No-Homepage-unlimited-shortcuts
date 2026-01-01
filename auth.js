@@ -1,10 +1,11 @@
 // Authentication Module for iCTrL Extension
-// Uses Chrome Identity API for Google Sign-In
+// Uses Chrome Identity API for Google Sign-In + Firebase Auth for ID token
 
 class AuthManager {
     constructor() {
         this.user = null;
-        this.token = null;
+        this.googleToken = null;  // Google OAuth access token
+        this.firebaseToken = null; // Firebase ID token for Firestore
         this.listeners = [];
     }
 
@@ -23,15 +24,25 @@ class AuthManager {
     // Initialize auth state from storage
     async init() {
         try {
-            const result = await chrome.storage.local.get(['authUser', 'authToken']);
-            if (result.authUser && result.authToken) {
+            const result = await chrome.storage.local.get(['authUser', 'googleToken', 'firebaseToken']);
+            if (result.authUser && result.firebaseToken) {
                 this.user = result.authUser;
-                this.token = result.authToken;
+                this.googleToken = result.googleToken;
+                this.firebaseToken = result.firebaseToken;
 
-                // Validate token is still valid
-                const isValid = await this.validateToken();
+                // Validate Firebase token is still valid
+                const isValid = await this.validateFirebaseToken();
                 if (!isValid) {
-                    await this.signOut();
+                    // Try to refresh with Google token
+                    if (this.googleToken) {
+                        try {
+                            await this.exchangeForFirebaseToken(this.googleToken);
+                        } catch {
+                            await this.signOut();
+                        }
+                    } else {
+                        await this.signOut();
+                    }
                 }
             }
             this.notifyListeners();
@@ -40,15 +51,18 @@ class AuthManager {
         }
     }
 
-    // Validate token with Google
-    async validateToken() {
-        if (!this.token) return false;
+    // Validate Firebase token
+    async validateFirebaseToken() {
+        if (!this.firebaseToken) return false;
 
         try {
-            const response = await fetch(
-                `https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=${this.token}`
-            );
-            return response.ok;
+            // Try a simple Firestore read to validate token
+            const testUrl = `${FIRESTORE_BASE_URL}/users/test?key=${FIREBASE_CONFIG.apiKey}`;
+            const response = await fetch(testUrl, {
+                headers: { 'Authorization': `Bearer ${this.firebaseToken}` }
+            });
+            // 404 is fine (doc doesn't exist), 401/403 means token expired
+            return response.status !== 401 && response.status !== 403;
         } catch {
             return false;
         }
@@ -57,8 +71,10 @@ class AuthManager {
     // Sign in with Google using Chrome Identity API
     async signIn() {
         try {
-            // Get OAuth token from Chrome
-            const token = await new Promise((resolve, reject) => {
+            console.log('[Auth] Starting sign in...');
+
+            // Step 1: Get OAuth token from Chrome
+            const googleToken = await new Promise((resolve, reject) => {
                 chrome.identity.getAuthToken({ interactive: true }, (token) => {
                     if (chrome.runtime.lastError) {
                         reject(new Error(chrome.runtime.lastError.message));
@@ -68,14 +84,18 @@ class AuthManager {
                 });
             });
 
-            if (!token) {
-                throw new Error('Failed to get auth token');
+            if (!googleToken) {
+                throw new Error('Failed to get Google auth token');
             }
 
-            this.token = token;
+            console.log('[Auth] Got Google token');
+            this.googleToken = googleToken;
 
-            // Get user info from Google
-            const userInfo = await this.fetchUserInfo(token);
+            // Step 2: Exchange Google token for Firebase ID token
+            await this.exchangeForFirebaseToken(googleToken);
+
+            // Step 3: Get user info from Google
+            const userInfo = await this.fetchUserInfo(googleToken);
 
             this.user = {
                 uid: userInfo.id,
@@ -87,7 +107,8 @@ class AuthManager {
             // Save to storage
             await chrome.storage.local.set({
                 authUser: this.user,
-                authToken: this.token
+                googleToken: this.googleToken,
+                firebaseToken: this.firebaseToken
             });
 
             // Create/update user document in Firestore
@@ -101,6 +122,46 @@ class AuthManager {
             console.error('[Auth] Sign in error:', error);
             throw error;
         }
+    }
+
+    // Exchange Google OAuth token for Firebase ID token
+    async exchangeForFirebaseToken(googleToken) {
+        console.log('[Auth] Exchanging for Firebase token...');
+
+        // Use Firebase Auth REST API - signInWithIdp
+        const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key=${FIREBASE_CONFIG.apiKey}`;
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                postBody: `access_token=${googleToken}&providerId=google.com`,
+                requestUri: 'https://localhost',
+                returnSecureToken: true,
+                returnIdpCredential: true
+            })
+        });
+
+        if (!response.ok) {
+            const error = await response.text();
+            console.error('[Auth] Firebase token exchange failed:', error);
+            throw new Error('Failed to get Firebase token');
+        }
+
+        const data = await response.json();
+        this.firebaseToken = data.idToken;
+
+        // Update user UID to use Firebase UID (more reliable)
+        if (data.localId) {
+            if (this.user) {
+                this.user.uid = data.localId;
+            }
+        }
+
+        console.log('[Auth] Got Firebase token');
+        return this.firebaseToken;
     }
 
     // Fetch user info from Google
@@ -119,24 +180,24 @@ class AuthManager {
         return response.json();
     }
 
-    // Create user document in Firestore
+    // Create user document in Firestore (using Firebase token)
     async createUserDocument() {
-        if (!this.user || !this.token) return;
+        if (!this.user || !this.firebaseToken) return;
 
         const userDocPath = `${FIRESTORE_BASE_URL}/users/${this.user.uid}`;
 
         try {
             // Check if user exists
-            const checkResponse = await fetch(userDocPath, {
-                headers: { Authorization: `Bearer ${this.token}` }
+            const checkResponse = await fetch(`${userDocPath}?key=${FIREBASE_CONFIG.apiKey}`, {
+                headers: { 'Authorization': `Bearer ${this.firebaseToken}` }
             });
 
             if (checkResponse.status === 404) {
                 // Create new user document
-                await fetch(userDocPath, {
+                await fetch(`${userDocPath}?key=${FIREBASE_CONFIG.apiKey}`, {
                     method: 'PATCH',
                     headers: {
-                        'Authorization': `Bearer ${this.token}`,
+                        'Authorization': `Bearer ${this.firebaseToken}`,
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
@@ -150,12 +211,12 @@ class AuthManager {
                     })
                 });
                 console.log('[Auth] Created user document');
-            } else {
+            } else if (checkResponse.ok) {
                 // Update last login
-                await fetch(`${userDocPath}?updateMask.fieldPaths=lastLogin`, {
+                await fetch(`${userDocPath}?key=${FIREBASE_CONFIG.apiKey}&updateMask.fieldPaths=lastLogin`, {
                     method: 'PATCH',
                     headers: {
-                        'Authorization': `Bearer ${this.token}`,
+                        'Authorization': `Bearer ${this.firebaseToken}`,
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
@@ -164,6 +225,7 @@ class AuthManager {
                         }
                     })
                 });
+                console.log('[Auth] Updated user lastLogin');
             }
         } catch (error) {
             console.error('[Auth] Error creating user document:', error);
@@ -173,18 +235,19 @@ class AuthManager {
     // Sign out
     async signOut() {
         try {
-            // Revoke token with Chrome
-            if (this.token) {
+            // Revoke Google token with Chrome
+            if (this.googleToken) {
                 await new Promise((resolve) => {
-                    chrome.identity.removeCachedAuthToken({ token: this.token }, resolve);
+                    chrome.identity.removeCachedAuthToken({ token: this.googleToken }, resolve);
                 });
             }
 
             this.user = null;
-            this.token = null;
+            this.googleToken = null;
+            this.firebaseToken = null;
 
             // Clear from storage
-            await chrome.storage.local.remove(['authUser', 'authToken']);
+            await chrome.storage.local.remove(['authUser', 'googleToken', 'firebaseToken']);
 
             this.notifyListeners();
             console.log('[Auth] Signed out');
@@ -198,14 +261,14 @@ class AuthManager {
         return this.user;
     }
 
-    // Get current token
+    // Get Firebase ID token (for Firestore API calls)
     getToken() {
-        return this.token;
+        return this.firebaseToken;
     }
 
     // Check if signed in
     isSignedIn() {
-        return this.user !== null && this.token !== null;
+        return this.user !== null && this.firebaseToken !== null;
     }
 }
 

@@ -1,0 +1,23 @@
+# Credentials - DO NOT COMMIT
+firebase-config.js
+
+# macOS
+.DS_Store
+*.swp
+*.swo
+
+# IDE
+.idea/
+.vscode/
+*.sublime-*
+
+# Logs
+*.log
+
+# Temp files
+*.tmp
+*.temp
+
+# Build artifacts
+*.zip
+dist/

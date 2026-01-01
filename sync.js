@@ -1,5 +1,5 @@
 // Cloud Sync Module for iCTrL Extension
-// Syncs shortcuts and settings with Firestore
+// Syncs shortcuts and settings with Firestore using Firebase Auth
 
 class SyncManager {
     constructor() {
@@ -7,7 +7,7 @@ class SyncManager {
         this.lastSyncTime = null;
     }
 
-    // Get auth token from authManager
+    // Get Firebase ID token from authManager
     getToken() {
         return authManager ? authManager.getToken() : null;
     }
@@ -34,7 +34,7 @@ class SyncManager {
 
         const userId = this.getUserId();
         const token = this.getToken();
-        const docPath = `${FIRESTORE_BASE_URL}/users/${userId}/data/shortcuts`;
+        const docPath = `${FIRESTORE_BASE_URL}/users/${userId}/data/shortcuts?key=${FIREBASE_CONFIG.apiKey}`;
 
         try {
             const shortcutsArray = shortcuts.map(s => ({
@@ -47,7 +47,7 @@ class SyncManager {
                 }
             }));
 
-            await fetch(docPath, {
+            const response = await fetch(docPath, {
                 method: 'PATCH',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -60,6 +60,12 @@ class SyncManager {
                     }
                 })
             });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('[Sync] Firestore save error:', response.status, errorText);
+                throw new Error(`HTTP ${response.status}: ${errorText}`);
+            }
 
             console.log('[Sync] Shortcuts saved to cloud');
             return true;
@@ -78,7 +84,7 @@ class SyncManager {
 
         const userId = this.getUserId();
         const token = this.getToken();
-        const docPath = `${FIRESTORE_BASE_URL}/users/${userId}/data/shortcuts`;
+        const docPath = `${FIRESTORE_BASE_URL}/users/${userId}/data/shortcuts?key=${FIREBASE_CONFIG.apiKey}`;
 
         try {
             const response = await fetch(docPath, {
@@ -91,6 +97,8 @@ class SyncManager {
             }
 
             if (!response.ok) {
+                const errorText = await response.text();
+                console.error('[Sync] Error fetching shortcuts:', response.status, errorText);
                 throw new Error('Failed to fetch shortcuts');
             }
 
@@ -124,14 +132,14 @@ class SyncManager {
 
         const userId = this.getUserId();
         const token = this.getToken();
-        const docPath = `${FIRESTORE_BASE_URL}/users/${userId}/data/settings`;
+        const docPath = `${FIRESTORE_BASE_URL}/users/${userId}/data/settings?key=${FIREBASE_CONFIG.apiKey}`;
 
         try {
             const whitelistArray = (settings.whitelistedDomains || []).map(d => ({
                 stringValue: d
             }));
 
-            await fetch(docPath, {
+            const response = await fetch(docPath, {
                 method: 'PATCH',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -146,6 +154,12 @@ class SyncManager {
                     }
                 })
             });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('[Sync] Error saving settings:', response.status, errorText);
+                return false;
+            }
 
             console.log('[Sync] Settings saved to cloud');
             return true;
@@ -163,7 +177,7 @@ class SyncManager {
 
         const userId = this.getUserId();
         const token = this.getToken();
-        const docPath = `${FIRESTORE_BASE_URL}/users/${userId}/data/settings`;
+        const docPath = `${FIRESTORE_BASE_URL}/users/${userId}/data/settings?key=${FIREBASE_CONFIG.apiKey}`;
 
         try {
             const response = await fetch(docPath, {
