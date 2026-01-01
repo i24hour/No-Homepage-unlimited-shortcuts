@@ -1,13 +1,23 @@
 {
     "manifest_version": 3,
     "name": "iCTrL - Tab Control & Quick Links",
-    "version": "1.0",
+    "version": "1.1",
     "description": "Control your browser! Quick link shortcuts on new tab + RAM Saver that auto-closes inactive tabs.",
     "permissions": [
         "storage",
         "tabs",
-        "alarms"
+        "alarms",
+        "identity"
     ],
+    "oauth2": {
+        "client_id": "158430504218-6kjkorj1aej4m3khkkj8j0tcofto8r6p.apps.googleusercontent.com",
+        "scopes": [
+            "openid",
+            "email",
+            "profile",
+            "https://www.googleapis.com/auth/datastore"
+        ]
+    },
     "action": {
         "default_popup": "popup.html",
         "default_title": "iCTrL - Control Your Browser"
@@ -26,5 +36,6 @@
     },
     "chrome_url_overrides": {
         "newtab": "newtab.html"
-    }
+    },
+    "key": "YOUR_EXTENSION_KEY"
 }
